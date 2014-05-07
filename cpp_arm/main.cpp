@@ -22,11 +22,10 @@
 #include "ossie/ossieSupport.h"
 
 #include "DifferentialDecoder.h"
-
-
 int main(int argc, char* argv[])
 {
     DifferentialDecoder_i* DifferentialDecoder_servant;
     Resource_impl::start_component(DifferentialDecoder_servant, argc, argv);
     return 0;
 }
+

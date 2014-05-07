@@ -20,4 +20,7 @@
   <implSettings key="cpp_armv7l">
     <value outputDir="cpp_armv7l" template="redhawk.codegen.jinja.cpp.component.pull" generatorId="gov.redhawk.ide.codegen.jinja.cplusplus.CplusplusGenerator"/>
   </implSettings>
+  <implSettings key="cpp_arm">
+    <value outputDir="cpp_arm" template="redhawk.codegen.jinja.cpp.component.pull" generatorId="gov.redhawk.ide.codegen.jinja.cplusplus.CplusplusGenerator"/>
+  </implSettings>
 </codegen:WaveDevSettings>

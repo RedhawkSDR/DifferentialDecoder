@@ -22,7 +22,7 @@
 # You can override this at install time using --prefix /new/sdr/root when invoking rpm (preferred method, if you must)
 %{!?_sdrroot: %define _sdrroot /var/redhawk/sdr}
 %define _prefix %{_sdrroot}
-Prefix: %{_prefix}
+Prefix:         %{_prefix}
 
 # Point install paths to locations within our target SDR root
 %define _sysconfdir    %{_prefix}/etc
@@ -30,29 +30,29 @@ Prefix: %{_prefix}
 %define _mandir        %{_prefix}/man
 %define _infodir       %{_prefix}/info
 
-Name: DifferentialDecoder
-Summary: Component %{name}
-Version: 1.0.0
-Release: 1
-License: None
-Group: REDHAWK/Components
-Source: %{name}-%{version}.tar.gz
-BuildRoot: %{_tmppath}/%{name}-root
+Name:           DifferentialDecoder
+Version:        1.0.0
+Release:        1%{?dist}
+Summary:        Component %{name}
 
-Requires: redhawk >= 1.9
-BuildRequires: redhawk-devel >= 1.9
-BuildRequires: autoconf automake libtool
+Group:          REDHAWK/Components
+License:        None
+Source0:        %{name}-%{version}.tar.gz
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+BuildRequires:  redhawk-devel >= 1.10
+Requires:       redhawk >= 1.10
 
 # Interface requirements
-Requires: bulkioInterfaces
-BuildRequires: bulkioInterfaces
+BuildRequires:  bulkioInterfaces >= 1.10
+Requires:       bulkioInterfaces >= 1.10
 
 %description
 Component %{name}
 
 
 %prep
-%setup
+%setup -q
 
 
 %build
@@ -63,10 +63,10 @@ pushd cpp
 %configure
 make %{?_smp_mflags}
 popd
-# Implementation cpp_armv7l
-pushd cpp_armv7l
+# Implementation cpp_arm
+pushd cpp_arm
 ./reconf
-%define _bindir %{_prefix}/dom/components/DifferentialDecoder/cpp_armv7l
+%define _bindir %{_prefix}/dom/components/DifferentialDecoder/cpp_arm
 %configure
 make %{?_smp_mflags}
 popd
@@ -79,9 +79,9 @@ pushd cpp
 %define _bindir %{_prefix}/dom/components/DifferentialDecoder/cpp
 make install DESTDIR=$RPM_BUILD_ROOT
 popd
-# Implementation cpp_armv7l
-pushd cpp_armv7l
-%define _bindir %{_prefix}/dom/components/DifferentialDecoder/cpp_armv7l
+# Implementation cpp_arm
+pushd cpp_arm
+%define _bindir %{_prefix}/dom/components/DifferentialDecoder/cpp_arm
 make install DESTDIR=$RPM_BUILD_ROOT
 popd
 
@@ -91,11 +91,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %files
-%defattr(-,redhawk,redhawk)
+%defattr(-,redhawk,redhawk,-)
 %dir %{_prefix}/dom/components/%{name}
 %{_prefix}/dom/components/%{name}/DifferentialDecoder.scd.xml
 %{_prefix}/dom/components/%{name}/DifferentialDecoder.prf.xml
 %{_prefix}/dom/components/%{name}/DifferentialDecoder.spd.xml
 %{_prefix}/dom/components/%{name}/cpp
-%{_prefix}/dom/components/%{name}/cpp_armv7l
+%{_prefix}/dom/components/%{name}/cpp_arm
 

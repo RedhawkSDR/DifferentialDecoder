@@ -32,85 +32,40 @@
 
 DifferentialDecoder_base::DifferentialDecoder_base(const char *uuid, const char *label) :
     Resource_impl(uuid, label),
-    serviceThread(0)
+    ThreadedComponent()
 {
-    construct();
+    loadProperties();
+
+    dataShort_in = new bulkio::InShortPort("dataShort_in");
+    addPort("dataShort_in", dataShort_in);
+    dataShort_out = new bulkio::OutShortPort("dataShort_out");
+    addPort("dataShort_out", dataShort_out);
 }
 
-void DifferentialDecoder_base::construct()
+DifferentialDecoder_base::~DifferentialDecoder_base()
 {
-    Resource_impl::_started = false;
-    loadProperties();
-    serviceThread = 0;
-    
-    PortableServer::ObjectId_var oid;
-    dataShort_in = new bulkio::InShortPort("dataShort_in");
-    oid = ossie::corba::RootPOA()->activate_object(dataShort_in);
-    dataShort_out = new bulkio::OutShortPort("dataShort_out");
-    oid = ossie::corba::RootPOA()->activate_object(dataShort_out);
-
-    registerInPort(dataShort_in);
-    registerOutPort(dataShort_out, dataShort_out->_this());
+    delete dataShort_in;
+    dataShort_in = 0;
+    delete dataShort_out;
+    dataShort_out = 0;
 }
 
 /*******************************************************************************************
     Framework-level functions
     These functions are generally called by the framework to perform housekeeping.
 *******************************************************************************************/
-void DifferentialDecoder_base::initialize() throw (CF::LifeCycle::InitializeError, CORBA::SystemException)
-{
-}
-
 void DifferentialDecoder_base::start() throw (CORBA::SystemException, CF::Resource::StartError)
 {
-    boost::mutex::scoped_lock lock(serviceThreadLock);
-    if (serviceThread == 0) {
-        dataShort_in->unblock();
-        serviceThread = new ProcessThread<DifferentialDecoder_base>(this, 0.1);
-        serviceThread->start();
-    }
-    
-    if (!Resource_impl::started()) {
-    	Resource_impl::start();
-    }
+    Resource_impl::start();
+    ThreadedComponent::startThread();
 }
 
 void DifferentialDecoder_base::stop() throw (CORBA::SystemException, CF::Resource::StopError)
 {
-    boost::mutex::scoped_lock lock(serviceThreadLock);
-    // release the child thread (if it exists)
-    if (serviceThread != 0) {
-        dataShort_in->block();
-        if (!serviceThread->release(2)) {
-            throw CF::Resource::StopError(CF::CF_NOTSET, "Processing thread did not die");
-        }
-        serviceThread = 0;
+    Resource_impl::stop();
+    if (!ThreadedComponent::stopThread()) {
+        throw CF::Resource::StopError(CF::CF_NOTSET, "Processing thread did not die");
     }
-    
-    if (Resource_impl::started()) {
-    	Resource_impl::stop();
-    }
-}
-
-CORBA::Object_ptr DifferentialDecoder_base::getPort(const char* _id) throw (CORBA::SystemException, CF::PortSupplier::UnknownPort)
-{
-
-    std::map<std::string, Port_Provides_base_impl *>::iterator p_in = inPorts.find(std::string(_id));
-    if (p_in != inPorts.end()) {
-        if (!strcmp(_id,"dataShort_in")) {
-            bulkio::InShortPort *ptr = dynamic_cast<bulkio::InShortPort *>(p_in->second);
-            if (ptr) {
-                return ptr->_this();
-            }
-        }
-    }
-
-    std::map<std::string, CF::Port_var>::iterator p_out = outPorts_var.find(std::string(_id));
-    if (p_out != outPorts_var.end()) {
-        return CF::Port::_duplicate(p_out->second);
-    }
-
-    throw (CF::PortSupplier::UnknownPort());
 }
 
 void DifferentialDecoder_base::releaseObject() throw (CORBA::SystemException, CF::LifeCycle::ReleaseError)
@@ -122,16 +77,11 @@ void DifferentialDecoder_base::releaseObject() throw (CORBA::SystemException, CF
         // TODO - this should probably be logged instead of ignored
     }
 
-    // deactivate ports
-    releaseInPorts();
-    releaseOutPorts();
-
-    delete(dataShort_in);
-    delete(dataShort_out);
-
     Resource_impl::releaseObject();
 }
 
 void DifferentialDecoder_base::loadProperties()
 {
 }
+
+
