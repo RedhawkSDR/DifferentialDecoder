@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE softpkg PUBLIC "-//JTRS//DTD SCA V2.2.2 SPD//EN" "softpkg.dtd">
-<softpkg id="DCE:edddc6bd-a4e6-4cdd-ab03-d5b41487f063" name="DifferentialDecoder" type="sca_compliant" version="1.0.0dev0">
+<softpkg id="DCE:edddc6bd-a4e6-4cdd-ab03-d5b41487f063" name="DifferentialDecoder" type="sca_compliant" version="1.0.0">
   <title></title>
   <author>
     <name>null</name>
